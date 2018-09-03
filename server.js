@@ -4,6 +4,7 @@ var path = require('path')
 var session = require('express-session')
 var axios = require('axios')
 var config = require('./config')
+var WXBizDataCrypt = require('./WXBizDataCrypt')
 var app = express()
 
 var port = 8080
@@ -15,7 +16,7 @@ var userList = [
     nickName: '',
     avatarUrl: '',
     unionId: '',
-    phone: ''
+    phoneNumber: ''
   }
 ]
 
@@ -68,12 +69,25 @@ app
   })
 
   .post('/user/bindphone', (req, res) => {
-    var {encryptedData, iv} = req.body
+    var user = req.session.user
+    if (user) {
+      var {encryptedData, iv} = req.body
+      var pc = new WXBizDataCrypt(config.appId, user.sessionKey)
+      var data = pc.decryptData(encryptedData, iv)
+      Object.assign(user, data)
+      res.send(req.session.user)
+    }
   })
 
-  .get('/user/bindinfo', (req, res) => {
-    var {encryptedData, iv} = req.body
-
+  .post('/user/bindinfo', (req, res) => {
+    var user = req.session.user
+    if (user) {
+      var {encryptedData, iv} = req.body
+      var pc = new WXBizDataCrypt(config.appId, user.sessionKey)
+      var data = pc.decryptData(encryptedData, iv)
+      Object.assign(user, data)
+      res.send(req.session.user)
+    }
   })
 
   .listen(port, err => {
