@@ -10,6 +10,7 @@ var app = express()
 var port = 8080
 
 var userList = [
+  // 数据结构如下
   {
     openId: '',
     sessionKey: '',
