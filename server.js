@@ -20,6 +20,10 @@ var userList = [
   }
 ]
 
+var sessionMap = {
+
+}
+
 app
   .use(bodyParser.urlencoded({ extended: false }))
   .use(bodyParser.json())
@@ -30,12 +34,13 @@ app
   }))
 
   .use((req, res, next) => {
+    req.user = sessionMap[req.session.id]
     console.log(`req.url: ${req.url}`)
     console.log(`session`, req.session.id)
     next()
   })
 
-  .all('/oauth/login', (req, res) => {
+  .post('/oauth/login', (req, res) => {
     var params = req.body
     var {code, type} = params
     if (type === 'wxapp') {
@@ -56,37 +61,42 @@ app
             openId,
             sessionKey: data.session_key
           }
+          userList.push(user)
+          console.log('新用户', user)
+        } else {
+          console.log('老用户', user)
         }
-        req.session.user = user
+        sessionMap[req.session.id] = user
+        req.user = user
       }).then(() => {
-        res.send(req.session.user)
+        res.send(req.user)
       })
     }
   })
 
   .get('/user/info', (req, res) => {
-    res.send(req.session.user)
+    res.send(req.user)
   })
 
   .post('/user/bindphone', (req, res) => {
-    var user = req.session.user
+    var user = req.user
     if (user) {
       var {encryptedData, iv} = req.body
       var pc = new WXBizDataCrypt(config.appId, user.sessionKey)
       var data = pc.decryptData(encryptedData, iv)
       Object.assign(user, data)
-      res.send(req.session.user)
+      res.send(req.user)
     }
   })
 
   .post('/user/bindinfo', (req, res) => {
-    var user = req.session.user
+    var user = req.user
     if (user) {
       var {encryptedData, iv} = req.body
       var pc = new WXBizDataCrypt(config.appId, user.sessionKey)
       var data = pc.decryptData(encryptedData, iv)
       Object.assign(user, data)
-      res.send(req.session.user)
+      res.send(req.user)
     }
   })
 
