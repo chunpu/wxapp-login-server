@@ -3,4 +3,3 @@ coverage
 *.map
 *.log
 yarn.lock
-config.js
