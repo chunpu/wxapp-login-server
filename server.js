@@ -7,12 +7,12 @@ var config = require('./config')
 var WXBizDataCrypt = require('./WXBizDataCrypt')
 var app = express()
 
-var port = 8080
+var port = 9999
 
 var userList = [
   // 数据结构如下
   {
-    openId: '',
+    openId: '', // 理论上不应该返回给前端
     sessionKey: '',
     nickName: '',
     avatarUrl: '',
@@ -37,7 +37,11 @@ app
   .use((req, res, next) => {
     req.user = sessionMap[req.session.id]
     console.log(`req.url: ${req.url}`)
-    console.log(`session`, req.session.id)
+    if (req.user) {
+      console.log(`wxapp openId`, req.user.openId)
+    } else {
+      console.log(`session`, req.session.id)
+    }
     next()
   })
 
@@ -70,13 +74,19 @@ app
         sessionMap[req.session.id] = user
         req.user = user
       }).then(() => {
-        res.send(req.user)
+        res.send({
+          code: 0,
+          data: req.user
+        })
       })
     }
   })
 
   .get('/user/info', (req, res) => {
-    res.send(req.user)
+    res.send({
+      code: 0,
+      data: req.user
+    })
   })
 
   .post('/user/bindphone', (req, res) => {
@@ -86,8 +96,13 @@ app
       var pc = new WXBizDataCrypt(config.appId, user.sessionKey)
       var data = pc.decryptData(encryptedData, iv)
       Object.assign(user, data)
-      res.send(req.user)
+      return res.send({
+        code: 0
+      })
     }
+    return res.send({
+      code: 500
+    })
   })
 
   .post('/user/bindinfo', (req, res) => {
@@ -97,8 +112,13 @@ app
       var pc = new WXBizDataCrypt(config.appId, user.sessionKey)
       var data = pc.decryptData(encryptedData, iv)
       Object.assign(user, data)
-      res.send(req.user)
+      return res.send({
+        code: 0
+      })
     }
+    return res.send({
+      code: 500
+    })
   })
 
   .listen(port, err => {
