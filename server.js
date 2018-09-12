@@ -21,9 +21,7 @@ var userList = [
   }
 ]
 
-var sessionMap = {
-
-}
+var sessionMap = {}
 
 app
   .use(bodyParser.urlencoded({ extended: false }))
@@ -75,18 +73,22 @@ app
         req.user = user
       }).then(() => {
         res.send({
-          code: 0,
-          data: req.user
+          code: 0
         })
       })
+    } else {
+      throw new Error('未知的授权类型')
     }
   })
 
   .get('/user/info', (req, res) => {
-    res.send({
-      code: 0,
-      data: req.user
-    })
+    if (req.user) {
+      return res.send({
+        code: 0,
+        data: req.user
+      })
+    }
+    throw new Error('用户未登录')
   })
 
   .post('/user/bindphone', (req, res) => {
@@ -100,9 +102,7 @@ app
         code: 0
       })
     }
-    return res.send({
-      code: 500
-    })
+    throw new Error('用户未登录')
   })
 
   .post('/user/bindinfo', (req, res) => {
@@ -116,8 +116,14 @@ app
         code: 0
       })
     }
-    return res.send({
-      code: 500
+    throw new Error('用户未登录')
+  })
+
+  .use(function (err, req, res, next) {
+    console.error(err.stack)
+    res.status(500).send({
+      code: 500,
+      message: err.message
     })
   })
 
