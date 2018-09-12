@@ -120,8 +120,8 @@ app
   })
 
   .use(function (err, req, res, next) {
-    console.error(err.stack)
-    res.status(500).send({
+    console.log(err)
+    res.send({
       code: 500,
       message: err.message
     })
