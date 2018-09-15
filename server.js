@@ -96,7 +96,11 @@ app
     if (user) {
       var {encryptedData, iv} = req.body
       var pc = new WXBizDataCrypt(config.appId, user.sessionKey)
-      var data = pc.decryptData(encryptedData, iv)
+      try {
+        var data = pc.decryptData(encryptedData, iv)
+      } catch (err) {
+        throw new Error('session 失效建议重新登录')
+      }
       Object.assign(user, data)
       return res.send({
         code: 0
@@ -110,7 +114,11 @@ app
     if (user) {
       var {encryptedData, iv} = req.body
       var pc = new WXBizDataCrypt(config.appId, user.sessionKey)
-      var data = pc.decryptData(encryptedData, iv)
+      try {
+        var data = pc.decryptData(encryptedData, iv)
+      } catch (err) {
+        throw new Error('session 失效建议重新登录')
+      }
       Object.assign(user, data)
       return res.send({
         code: 0
