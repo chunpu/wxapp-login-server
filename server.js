@@ -120,7 +120,7 @@ app
   })
 
   .use(function (err, req, res, next) {
-    console.log(err)
+    console.log('err', err.message)
     res.send({
       code: 500,
       message: err.message
