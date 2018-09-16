@@ -7,9 +7,10 @@ var config = require('./config')
 var WXBizDataCrypt = require('./WXBizDataCrypt')
 var app = express()
 
-var port = 9999
+const port = 9999
 
-var users = {
+// 存储所有用户信息
+const users = {
   // openId 作为索引
   openId: {
     // 数据结构如下
@@ -23,10 +24,11 @@ var users = {
 }
 
 app
-  .use(bodyParser.urlencoded({ extended: false }))
   .use(bodyParser.json())
   .use(session({
-    secret: 'alittlegirl'
+    secret: 'alittlegirl',
+    resave: false,
+    saveUninitialized: true
   }))
 
   .use((req, res, next) => {
@@ -65,7 +67,6 @@ app
           console.log('老用户', user)
         }
         req.session.openId = user.openId
-        req.user = user
       }).then(() => {
         res.send({
           code: 0
