@@ -9,9 +9,10 @@ var app = express()
 
 var port = 9999
 
-var userList = [
-  // 数据结构如下
-  {
+var users = {
+  // openId 作为索引
+  openId: {
+    // 数据结构如下
     openId: '', // 理论上不应该返回给前端
     sessionKey: '',
     nickName: '',
@@ -19,21 +20,17 @@ var userList = [
     unionId: '',
     phoneNumber: ''
   }
-]
-
-var sessionMap = {}
+}
 
 app
   .use(bodyParser.urlencoded({ extended: false }))
   .use(bodyParser.json())
   .use(session({
-    secret: 'alittlegirl',
-    resave: false,
-    saveUninitialized: true
+    secret: 'alittlegirl'
   }))
 
   .use((req, res, next) => {
-    req.user = sessionMap[req.session.id]
+    req.user = users[req.session.openId]
     console.log(`req.url: ${req.url}`)
     if (req.user) {
       console.log(`wxapp openId`, req.user.openId)
@@ -56,20 +53,18 @@ app
         }
       }).then(({data}) => {
         var openId = data.openid
-        var user = userList.find(user => {
-          return user.openId === openId
-        })
+        var user = users[openId]
         if (!user) {
           user = {
             openId,
             sessionKey: data.session_key
           }
-          userList.push(user)
+          users[openId] = user
           console.log('新用户', user)
         } else {
           console.log('老用户', user)
         }
-        sessionMap[req.session.id] = user
+        req.session.openId = user.openId
         req.user = user
       }).then(() => {
         res.send({
