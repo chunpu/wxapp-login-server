@@ -87,7 +87,7 @@ app
     throw new Error('用户未登录')
   })
 
-  .post('/user/bindphone', (req, res) => {
+  .post('/user/bindinfo', (req, res) => {
     var user = req.user
     if (user) {
       var {encryptedData, iv} = req.body
@@ -105,7 +105,7 @@ app
     throw new Error('用户未登录')
   })
 
-  .post('/user/bindinfo', (req, res) => {
+  .post('/user/bindphone', (req, res) => {
     var user = req.user
     if (user) {
       var {encryptedData, iv} = req.body
